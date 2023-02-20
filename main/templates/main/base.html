@@ -1,0 +1,75 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="{% static 'main/css/styles.css' %}?version=23">
+    <link type="image/x-icon" rel="icon" href="{% static 'main/images/icon.jpg' %}">
+    <title>{{title}}</title>
+</head>
+
+<body>
+    <header>
+        <nav class="navigation">
+            <ul>
+                {% for m in menu %}
+                    <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+                {% endfor %}
+                {% if request.user.is_authenticated %}
+                    <li class="last"><a href="#">{{user}}</a> | <a href="{% url 'logout' %}">Выход</a></li>
+                {% else %} 
+                    <li class="last"><a href="{% url 'registration' %}">Регистрация</a> | <a href="{% url 'login' %}">Вход</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <table cellspacing="0">
+            
+            <!-- Sidebar -->
+            <td valign="top" class="sidebar">
+                <form action="{% url 'home' %}" method="get">
+                    <input type="search" name='search-queue' placeholder="Поиск по тэгу" value="{{last_input}}">
+                    <button type="submit">Поиск</button>
+                </form>
+
+                <p id="tags-header">Популярное:</p>
+                {% for tag in common_tags %} 
+                    <a href="{% url 'tagged' tag %}">{{tag}}</a>
+                {% endfor %}
+            </td>
+            <!-- Sidebar -->
+            
+            <!-- Контент -->
+            <td valign="top" class="content">
+                <!-- <div class="content"> -->
+                    {% block content %} 
+                    {% endblock %}
+
+                    {% block form-block %}
+                        <h1>{{header}}</h1>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %} 
+                            <div class="form-error">{{form.non_field_errors}}</div>
+                            {% for f in form %}
+                                {% if f.label == 'Captcha' %} 
+                                    <p>{{f}}</p>
+                                {% else %}
+                                    <p><label class="form-label" for="{{f.id_for_label}}">{{f.label}}: </label>{{f}}</p>
+                                {% endif %}
+                                <div class="form-error">{{f.errors}}</div>
+                            {% endfor %}
+                            <button type="submit">{{button}}</button>
+                        </form>
+                    {% endblock %}
+                <!-- </div> -->
+            <!-- Контент -->
+            </td>
+        </table>
+    </main>
+    
+
+</body>
+</html>

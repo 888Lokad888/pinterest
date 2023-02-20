@@ -1,0 +1,45 @@
+{% extends 'main/base.html' %}
+{% load main_tags %}
+
+
+{% block content %} 
+
+{% for post in page_obj %}
+    <a class="all-posts" href="{{ post.get_absolute_url }}"><img src="{{post.photo.url}}"></a>
+{% endfor %}
+
+{% if page_obj.has_other_pages %} 
+<!-- <nav class="page-nav"> -->
+    <ul class="page-nav">
+        <!-- {% if page_obj.has_previous %} 
+            <a href="?{% url_replace page=page_obj.previous_page_number %}"><li>&lt;</li></a>
+        {% endif %}  -->
+        {% if page_obj.number > 3 %}
+            <a href="?{% url_replace page=1 %}"><li>1</li></a>
+             . . . 
+        {% endif %}
+        
+        {% for page in page_obj.paginator.page_range %} 
+            {% if page_obj.number == page %}
+                <li id="selected-page">{{page}}</li>
+            {% elif page >= page_obj.number|add:-2 and page <= page_obj.number|add:2 %} 
+                <a href="?{% url_replace page=page %}"><li>{{page}}</li></a>
+            {% endif %} 
+        {% endfor %} 
+        {% if page_obj.number < paginator.num_pages|add:-2 %}
+            . . . 
+            <a href="?{% url_replace page=paginator.num_pages %}"><li>{{paginator.num_pages}}</li></a> 
+        {% endif %}
+
+        <!-- {% if page_obj.has_next %} 
+            <a href="?{% url_replace page=page_obj.next_page_number %}"><li>&gt;</li></a>
+        {% endif %} -->
+    </ul>
+<!-- </nav> -->
+{% endif %}
+
+
+{% endblock %}
+
+{% block form-block %}
+{% endblock %}
