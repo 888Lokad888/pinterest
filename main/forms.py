@@ -1,5 +1,5 @@
 from django import forms 
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth.models import User
 from captcha.fields import ReCaptchaField
 from .models import *
@@ -12,10 +12,10 @@ class AddPostForm(forms.ModelForm):
        
 class RegisterUserForm(UserCreationForm):
     username = forms.CharField(label='Имя пользователя')
-    email = forms.EmailField(label='Email')
+    # email = forms.EmailField(label='Email')
     password1 = forms.CharField(label='Пароль')
     password2 = forms.CharField(label='Подтверждение пароля')
-    captcha = ReCaptchaField()
+    # captcha = ReCaptchaField()
 
     class Meta:
         model = User 
@@ -24,4 +24,16 @@ class RegisterUserForm(UserCreationForm):
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(label='Имя пользователя')
     password = forms.CharField(label='Пароль')
-    captcha = ReCaptchaField()
+    # captcha = ReCaptchaField()
+
+class ProfileForm(UserChangeForm):
+    class Meta:
+        model = User 
+        fields = ('username', 'email')
+
+class UpdateProfileForm(forms.ModelForm):
+    avatar = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
+
+    class Meta:
+        model = UserProfile
+        fields = ('avatar',)

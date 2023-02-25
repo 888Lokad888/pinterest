@@ -6,7 +6,6 @@ menu = [
 ]
 
 class DataMixin:
-    paginate_by = 1
     def get_extra_context(self, **kwargs):
         context = kwargs
         context['menu'] = menu 

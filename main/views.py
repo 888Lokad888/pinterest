@@ -1,12 +1,11 @@
 from django.http import HttpResponseNotFound
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login, logout
 from django.db.models import Count
-from django.db.models import F
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from .models import *
 from .forms import *
 from .utils import *
@@ -24,6 +23,7 @@ class HomePage(DataMixin, ListView):
     model = Post 
     template_name = 'main/index.html'
     context_object_name = 'posts'
+    paginate_by = 1
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,13 +59,13 @@ class ShowPost(DataMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        #views
+        #VIEWS
         ip = get_client_ip(self.request)
         if not IpModel.objects.filter(ip=ip).exists():
             IpModel.objects.create(ip=ip)
         kwargs['object'].views.add(IpModel.objects.get(ip=ip))
 
-        #likes
+        #LIKES
         user = self.request.user.id
 
         if 'buttton' in self.request.GET:
@@ -86,11 +86,8 @@ class ShowPost(DataMixin, DetailView):
         return dict(list(context.items()) + list(extra_context.items())) 
 
 class AddPost(LoginRequiredMixin, DataMixin, CreateView):
-    login_url = reverse_lazy('login')
-    
     form_class = AddPostForm
     template_name = 'main/add_post.html'
-    success_url = reverse_lazy('add_post')
 
     def form_valid(self, form):
         newpost = form.save(commit=False)
@@ -113,7 +110,6 @@ class AddPost(LoginRequiredMixin, DataMixin, CreateView):
 class RegisterUser(DataMixin, CreateView):
     form_class = RegisterUserForm
     template_name = 'main/registration.html'
-    success_url = reverse_lazy('login')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -141,20 +137,27 @@ class LoginUser(DataMixin, LoginView):
             button='Войти'
         )
         return dict(list(context.items()) + list(extra_context.items()))
+    
+def profile(request):
+    if request.method == 'POST':
+        user_form = ProfileForm(request.POST, instance=request.user)
+        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
 
-    def get_success_url(self):
-        return reverse_lazy('home')
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect(to='profile')
+    else:
+        user_form = ProfileForm(instance=request.user)
+        profile_form = UpdateProfileForm(instance=request.user.userprofile)
+
+    context = {
+        'user_form': user_form, 
+        'profile_form': profile_form
+    }
+
+    return render(request, 'main/profile.html', context)
 
 def logout_user(request):
     logout(request)
     return redirect('login')
-
-# def like_post(request, post_pk):
-#     post = Post.objects.get(pk=post_pk)
-#     user = request.user.id
-#     print(post.num)
-#     if post.likes.filter(id=user).exists():
-#         post.likes.remove(user)
-#     else:
-#         post.likes.add(user)
-#     return redirect('home')

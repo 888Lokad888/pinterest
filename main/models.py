@@ -1,11 +1,16 @@
 from django.db import models
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
+from pinterest import settings
 import uuid
+import os
 from django.urls import reverse
 
 def upload_dir(instance, file):
-    return f'{instance.num}/{file}'
+    return f'posts/{instance.num}/{file}'
+
+def upload_avatar(instance, file):
+    return f'profiles/{instance.user}/{file}'
 
 class Post(models.Model):
     num = models.UUIDField(default=uuid.uuid4, verbose_name='Артикль')
@@ -45,3 +50,10 @@ class IpModel(models.Model):
 
     def __str__(self):
         return self.ip
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to=upload_avatar, default='default_avatar.png', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.user)
