@@ -3,14 +3,14 @@ from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
 from pinterest import settings
 import uuid
-import os
 from django.urls import reverse
+from PIL import Image
 
 def upload_dir(instance, file):
     return f'posts/{instance.num}/{file}'
 
 def upload_avatar(instance, file):
-    return f'profiles/{instance.user}/{file}'
+    return f'profiles/{instance.user.id}/{file}'
 
 class Post(models.Model):
     num = models.UUIDField(default=uuid.uuid4, verbose_name='Артикль')
@@ -36,6 +36,9 @@ class Post(models.Model):
     def total_likes(self):
         return f'{self.likes.count():,d}'
     
+    def total_tags(self):
+        return f'{self.tags.count():,d}'
+    
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
@@ -55,5 +58,30 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to=upload_avatar, default='default_avatar.png', null=True, blank=True)
 
+    # resizing images
+    def save(self, *args, **kwargs):
+        super().save()
+
+        img = Image.open(self.avatar.path)
+        img = img.convert('RGB')
+
+        if img.height > 1000 or img.width > 1000:
+            new_img = (1000, 1000)
+            img.thumbnail(new_img)
+            img.save(self.avatar.path)
+
     def __str__(self):
         return str(self.user)
+    
+class Comments(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+    content = models.TextField()
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.user.id

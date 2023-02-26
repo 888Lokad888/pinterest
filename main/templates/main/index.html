@@ -4,9 +4,17 @@
 
 {% block content %} 
 
+<table>
 {% for post in page_obj %}
-    <a class="all-posts" href="{{ post.get_absolute_url }}"><img src="{{post.photo.url}}"></a>
+    <td style="display: inline-block;">
+        <a class="all-posts" href="{{ post.get_absolute_url }}"><img class="post-img" src="{{post.photo.url}}"></a>
+    </td>
 {% endfor %}
+</table>
+
+{% if title == 'Понравившееся' and not posts %} 
+    <h1>Здесь будут отображаться все понравившееся посты</h1>
+{% endif %}
 
 {% if page_obj.has_other_pages %} 
 <!-- <nav class="page-nav"> -->

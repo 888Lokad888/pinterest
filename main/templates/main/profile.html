@@ -1,45 +1,43 @@
 {% extends 'main/base.html' %} 
 
 {% block content %}
+    <table class="avatar">
+        <td>
+            <p><img src="{{ user.userprofile.avatar.url }}"/></p>
+        </td>
+        <td>
+            <p>{{user}}</p>
+            Дата регистрации: {{user.date_joined}}
+        </td>
+    </table>
 
-    <div class="row my-3 p-3">
-        <img class="rounded-circle account-img" src="{{ user.userprofile.avatar.url }} " style="cursor: pointer;"/>
-    </div>
-    {% if user_form.errors %}
-        <div class="alert alert-danger alert-dismissible" role="alert">
-            <div id="form_errors">
+    <div class="form-error">{{form.non_field_errors}}</div>
+
+    <form id="user-info" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p><label>Изменить фото: </label>{{ profile_form.avatar }}</p> 
+        <p><label>Имя пользователя: </label>{{ user_form.username }}</p>
+        {% if user_form.errors %}
+            <div class="form-error">
                 {% for key, value in user_form.errors.items %}
-                    <strong>{{ value }}</strong>
+                    {{ value }}
                 {% endfor %}
             </div>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endif %}
-    <div class="form-content">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-row">
-                <div class="col-md-5">
-                    <div class="form-group">
-                        <label class="small mb-1">Username:</label>
-                            {{ user_form.username }}
-                        <label class="small mb-1">Email:</label>
-                            {{ user_form.email }}
-                    </div>
-                    <div class="form-group">
-                        <a href="#">Change Password</a>
-                        <hr>
-                        <label class="small mb-1">Change Avatar:</label>
-                        {{ profile_form.avatar }}
-                    
-            </div>
-            <br><br>
-            <button type="submit" class="btn btn-dark btn-lg">Save Changes</button>
-            <button type="reset" class="btn btn-dark btn-lg">Reset</button>
-        </form>
-    </div>
+        {% endif %}
+        <button type="submit">Сохранить</button>
+    </form>
+    
+    <br>
+    <hr>
+
+    <form id="user-password" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for f in password_form %}
+            <p><label class="form-label" for="{{f.id_for_label}}">{{f.label}}: </label>{{f}}</p>
+            <div class="form-error">{{f.errors}}</div>
+        {% endfor %}
+        <button type="submit">Изменить пароль</button>
+    </form>
 {% endblock content %}
 
 {% block form-block %} 

@@ -1,11 +1,12 @@
 {% load static %}
+{% load main_tags %}
 
 <!DOCTYPE html>
 
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link type="text/css" rel="stylesheet" href="{% static 'main/css/styles.css' %}?version=23">
+    <link type="text/css" rel="stylesheet" href="{% static 'main/css/styles.css' %}?version=123">
     <link type="image/x-icon" rel="icon" href="{% static 'main/images/icon.jpg' %}">
     <title>{{title}}</title>
 </head>
@@ -17,6 +18,8 @@
                 {% for m in menu %}
                     <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
                 {% endfor %}
+                    <li><a href="{% random_post %}">Случайный пост</a></li>
+
                 {% if request.user.is_authenticated %}
                     <li class="last"><a href="{% url 'profile' %}">{{user}}</a> | <a href="{% url 'logout' %}">Выход</a></li>
                 {% else %} 
@@ -36,8 +39,9 @@
                 </form>
 
                 <p id="tags-header">Популярное:</p>
+
                 {% for tag in common_tags %} 
-                    <a href="{% url 'tagged' tag %}">{{tag}}</a>
+                    <p><a href="{% url 'tagged' tag %}">{{tag}} ({% count_tags tag %})</a></p>
                 {% endfor %}
             </td>
             <!-- Sidebar -->
